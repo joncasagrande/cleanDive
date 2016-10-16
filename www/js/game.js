@@ -19,8 +19,8 @@ function preload() {
 }
 
 function create() {
-    game.world.setBounds(0, 0, 800, 4000*4000);
-    land = game.add.tileSprite(0, 0, 800, 4000*4000, 'sky');
+    game.world.setBounds(0, 0, 600, 4000*4000);
+    land = game.add.tileSprite(0, 0, 600, 4000*4000, 'sky');
     
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -29,9 +29,9 @@ function create() {
     platforms = game.add.group();
     stars = game.add.group();
 
-    
+    game.time.events.repeat(Phaser.Timer.SECOND * 2, 10, createStars, this);
    // createPlatform(platforms)
-    createStars(stars);
+   // createStars(stars);
     createPlayer()
     
     scoreText = game.add.text(0, 0, 'score: 0', { fontSize: '18px', fill: '#000' });
@@ -102,13 +102,11 @@ function createPlatform(platforms){
         ground.body.immovable = true;
 }
 
-function createStars(stars){
+function createStars(){
     stars.enableBody = true;
-    for(var i = 0; i< 12; i++){
-        var star = stars.create(i *20  * Math.random(), Math.random() * 1000, 'star');
-            //star.body.gravity.y = 6;
-            star.body.bounce.y = 0.7 + Math.random() * 0.2;
+    var star = stars.create(game.world.randomX, 0,'star');
+        star.body.gravity.y = 6;
+        star.body.bounce.y = 0.7 + Math.random() * 0.2;
 
-    }
     game.physics.arcade.collide(stars, platforms);
 }
