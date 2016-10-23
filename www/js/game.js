@@ -3,7 +3,7 @@ var game = new Phaser.Game(600, 800, Phaser.AUTO, '',
 var score = 0;
 var scoreText;
 
-//var player;
+var player;
 var platforms;
 var cursors;
 
@@ -11,19 +11,24 @@ var stars;
 var score = 0;
 var scoreText;
 
+var enemy;
+
 function preload() {
     game.load.image('sky', 'img/sky.png');
     game.load.image('ground', 'img/platform.png');
     game.load.image('star', 'img/star.png');
+    game.load.image('enemy', 'img/diamond.png')
     game.load.spritesheet('dude', 'img/dude.png', 32, 48);
 }
 
 function create() {
+    game.physics.startSystem(Phaser.Physics.P2JS);
     game.world.setBounds(0, 0, 600, 4000*4000);
     land = game.add.tileSprite(0, 0, 600, 4000*4000, 'sky');
     
-
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    enemy = game.add.sprite(300, 60, 'enemy');
+    game.physics.p2.enable(enemy,false);    
+    
     //game.add.sprite(0, 0, 'sky');
     
     platforms = game.add.group();
@@ -65,12 +70,24 @@ function update() {
         player.body.velocity.y = 450;
         player.animations.play('down');
     }else if(cursors.up.isDown){
-    player.body.velocity.y = -150;
+        player.body.velocity.y = -150;
     }else{
         //  Stand still
         player.animations.stop();
         player.frame = 4;
     }
+
+    if(!Phaser.Rectangle.contains(player.body, enemy.x, enemy.y)){
+        accelerateToObject(enemy, player, 30);
+    }
+}
+
+function accelerateToObject(obj1, obj2, speed) {
+    if (typeof speed === 'undefined') { speed = 60; }
+    var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
+    obj1.body.rotation = angle + game.math.degToRad(90);  // correct angle of angry bullets (depends on the sprite used)
+    obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
+    obj1.body.force.y = Math.sin(angle) * speed;
 }
 
 function render(){
@@ -92,6 +109,7 @@ function createPlayer(){
     //  Our two animations, walking left and right.
     player.animations.add('left', [0, 1, 2, 3], 10, true);
     player.animations.add('right', [5, 6, 7, 8], 10, true);
+    game.physics.p2.enable(player);
 }
 
 function createPlatform(platforms){
